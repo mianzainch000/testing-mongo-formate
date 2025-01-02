@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-
+const jwt = require('jsonwebtoken');
 const validatePassword = (password) => {
   if (!password) {
     return "Password is required.";
@@ -24,7 +24,13 @@ const comparePassword = async (pass, hashedPassword) => {
   return await bcrypt.compare(pass, hashedPassword);
 };
 
+const generateToken = (payload, secret, expiresIn) => {
+  return jwt.sign(payload, secret, { expiresIn });
+};
+
 module.exports = {
   validatePassword,
   generateHashPassword,
+  comparePassword ,
+  generateToken
 };
