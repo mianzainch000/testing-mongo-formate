@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const ForgetPasswordEmail = require("../emailTemplate");
 const User = require("../model/userSchema");
 const {
+  verifyToken,
   generateToken,
   comparePassword,
   validatePassword,
@@ -148,5 +149,53 @@ exports.forgotPassword = async (req, res) => {
       .send({ message: "Password reset email sent successfully." });
   } catch (error) {
     return res.status(500).send({ message: "Internal server error." });
+  }
+};
+
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { tokenEmail: token } = req.params;
+    const { newPassword } = req.body;
+
+    // Validate inputs
+    if (!token || !newPassword) {
+      return res.status(400).send({ message: "Token and new password are required" });
+    }
+
+    // Validate the new password using helper function
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      return res.status(400).send({ message: passwordError });
+    }
+
+    // Verify the token using the helper function
+    let decoded;
+    try {
+      decoded = verifyToken(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(400).send({ message: err.message });
+    }
+
+    // Extract email from the token
+    const { email } = decoded;
+
+    // // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Hash the new password using helper function
+    const hashedPassword = await generateHashPassword(newPassword);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(201).send({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error in ResetPassword:", error.message);
+    res.status(500).send({ message: "Internal server error" });
   }
 };
