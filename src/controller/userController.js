@@ -152,7 +152,6 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-
 exports.resetPassword = async (req, res) => {
   try {
     const { tokenEmail: token } = req.params;
@@ -160,7 +159,9 @@ exports.resetPassword = async (req, res) => {
 
     // Validate inputs
     if (!token || !newPassword) {
-      return res.status(400).send({ message: "Token and new password are required" });
+      return res
+        .status(400)
+        .send({ message: "Token and new password are required" });
     }
 
     // Validate the new password using helper function
