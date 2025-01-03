@@ -1,4 +1,6 @@
 require("dotenv").config();
+const nodemailer = require("nodemailer");
+const ForgetPasswordEmail = require("../emailTemplate");
 const User = require("../model/userSchema");
 const {
   generateToken,
@@ -91,5 +93,60 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error." });
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).send({ message: "Please provide an email." });
+    }
+
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    // Generate JWT token using helper function
+    const tokenEmail = generateToken(
+      { email },
+      process.env.JWT_SECRET,
+      process.env.JWT_EXPIRATION_EMAIL
+    );
+
+    // Prepare email transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      secure: true,
+      auth: {
+        user: process.env.OWNER_EMAIL, // Use environment variables
+        pass: process.env.OWNER_PASS,
+      },
+    });
+
+    // Email content
+    const html = ForgetPasswordEmail.email(
+      "http://localhost:3000/auth/resetPassword",
+      tokenEmail
+    );
+    const emailOptions = {
+      from: process.env.OWNER_EMAIL,
+      to: email,
+      subject: "Here's your password reset link!",
+      text: "click on Button to Reset ",
+      html: html,
+    };
+
+    // Send the email
+    await transporter.sendMail(emailOptions);
+
+    return res
+      .status(201)
+      .send({ message: "Password reset email sent successfully." });
+  } catch (error) {
+    return res.status(500).send({ message: "Internal server error." });
   }
 };
