@@ -14,7 +14,7 @@ exports.signup = async (req, res) => {
     // Check for duplicate email
     let existingUserEmail = await User.findOne({ email });
     if (existingUserEmail) {
-      return res.status(409).send({ message: "Email already in use" });
+      return res.status(400).send({ message: "Email already in use" });
     }
 
     // Validate password
@@ -50,9 +50,7 @@ exports.signup = async (req, res) => {
       return res.status(400).send({ message: errors.join(", ") }); // Send validation errors to the client
     }
 
-    res
-      .status(500)
-      .send({ message: "Something went wrong, please try again." });
+    res.status(500).send({ message: "Internal Server Error." });
   }
 };
 
@@ -61,7 +59,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    console.log("user=============",user)
+
     if (!user) {
       return res.status(400).send({ message: "Invalid email" });
     }
@@ -92,8 +90,6 @@ exports.login = async (req, res) => {
       token: token,
     });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: "Something went wrong, please try again." });
+    res.status(500).send({ message: "Internal Server Error." });
   }
 };
