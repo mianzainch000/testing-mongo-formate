@@ -27,7 +27,7 @@ exports.createProduct = async (req, res) => {
 
       let result = await newProduct.save();
       if (result) {
-      return  res
+        return res
           .status(201)
           .send({ message: "Product added successfully", product: result });
       } else {
@@ -46,12 +46,12 @@ exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find();
     if (products.length > 0) {
-    return  res.status(200).send(products);
+      return res.status(200).send(products);
     } else {
       res.status(404).send({ message: "No Record Found" });
     }
   } catch (error) {
-   return res
+    return res
       .status(500)
       .send({ message: "Something went wrong, please try again." });
   }
@@ -65,9 +65,8 @@ exports.deleteProduct = async (req, res) => {
         message: "Product deleted successfully",
         product: deletedProduct,
       });
-    } else {
-     return res.status(404).send({ message: "Product not found." });
     }
+    return;
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal Server Error." });
@@ -81,13 +80,13 @@ exports.getProductById = async (req, res) => {
     if (product) {
       return res.status(200).send({
         product: product,
-        message: "Product fetch successfully"
+        message: "Product fetch successfully",
       });
     } else {
       return res.status(404).send({ message: "Product not found." });
     }
   } catch (error) {
     console.error(error);
-    res.status(400).send({ message: "Internal Server Error." });
+    res.status(500).send({ message: "Internal Server Error." });
   }
 };
