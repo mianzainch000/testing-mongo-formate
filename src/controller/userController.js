@@ -1,10 +1,10 @@
 require("dotenv").config();
 const User = require("../model/userSchema");
 const {
-  validatePassword,
-  generateHashPassword,
   generateToken,
   comparePassword,
+  validatePassword,
+  generateHashPassword,
 } = require("../helper/helperFunction");
 
 exports.signup = async (req, res) => {
